@@ -1,0 +1,74 @@
+{
+  "label_status": "proposed, not independently reviewed",
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "candidates": 25,
+  "profiles": 3,
+  "embedding": {
+    "precision_at_5": 0.7999999999999999,
+    "mrr": 1.0
+  },
+  "keyword_baseline": {
+    "precision_at_5": 0.7333333333333334,
+    "mrr": 1.0
+  },
+  "per_profile": [
+    {
+      "profile": "software",
+      "embedding": {
+        "precision_at_5": 0.8,
+        "reciprocal_rank": 1.0
+      },
+      "keyword_baseline": {
+        "precision_at_5": 0.6,
+        "reciprocal_rank": 1.0
+      },
+      "embedding_top5": [
+        "synthetic-03",
+        "synthetic-01",
+        "synthetic-13",
+        "synthetic-04",
+        "synthetic-25"
+      ],
+      "strictly_above_0_80": 0
+    },
+    {
+      "profile": "database",
+      "embedding": {
+        "precision_at_5": 0.6,
+        "reciprocal_rank": 1.0
+      },
+      "keyword_baseline": {
+        "precision_at_5": 0.8,
+        "reciprocal_rank": 1.0
+      },
+      "embedding_top5": [
+        "synthetic-04",
+        "synthetic-17",
+        "synthetic-21",
+        "synthetic-25",
+        "synthetic-05"
+      ],
+      "strictly_above_0_80": 0
+    },
+    {
+      "profile": "data-ml",
+      "embedding": {
+        "precision_at_5": 1.0,
+        "reciprocal_rank": 1.0
+      },
+      "keyword_baseline": {
+        "precision_at_5": 0.8,
+        "reciprocal_rank": 1.0
+      },
+      "embedding_top5": [
+        "synthetic-06",
+        "synthetic-16",
+        "synthetic-05",
+        "synthetic-12",
+        "synthetic-22"
+      ],
+      "strictly_above_0_80": 0
+    }
+  ],
+  "limitations": "Three synthetic profiles and proposed labels; no independent validation, tuning, accuracy or hiring-outcome claim."
+}

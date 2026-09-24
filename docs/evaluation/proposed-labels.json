@@ -1,0 +1,9 @@
+{
+  "label_status": "proposed, not independently reviewed",
+  "split": "fixed demonstration holdout; no training or tuning performed",
+  "profiles": [
+    {"id":"software","skills":["Python","FastAPI","React","SQL","Git"],"coursework":["Software Engineering","Database Systems"],"projects":[{"title":"Internship platform","description":"Built REST APIs with Python FastAPI and a React interface backed by SQL.","technologies":["Python","FastAPI","React","SQL"]}],"relevant":["synthetic-01","synthetic-03","synthetic-13","synthetic-25"]},
+    {"id":"database","skills":["SQL","MySQL","PostgreSQL","Python"],"coursework":["Database Systems","Data Modeling"],"projects":[{"title":"Library database","description":"Designed relational tables, indexes and secure queries for a library application.","technologies":["SQL","MySQL"]}],"relevant":["synthetic-04","synthetic-17","synthetic-19","synthetic-21"]},
+    {"id":"data-ml","skills":["Python","pandas","NumPy","PyTorch"],"coursework":["Machine Learning","Statistics","Linear Algebra"],"projects":[{"title":"Motion analysis","description":"Analyzed human motion features and evaluated a neural classifier with a held-out dataset.","technologies":["Python","PyTorch","NumPy"]}],"relevant":["synthetic-05","synthetic-06","synthetic-12","synthetic-16","synthetic-22"]}
+  ]
+}
