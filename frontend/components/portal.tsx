@@ -9,6 +9,7 @@ import { ApplicationsPage, Notifications } from './activity';
 import { AccountSettings } from './settings';
 import { Empty } from './ui';
 import { AdminPage, VerificationPage, MyReports } from './trust';
+import { RAGChat } from './rag-chat';
 
 export function Portal({ role }: { role: Role }) {
   const params = useParams<{ path?: string[] }>(),
@@ -23,6 +24,7 @@ export function Portal({ role }: { role: Role }) {
     page = role === 'student' ? <StudentProfilePage /> : <EmployerProfilePage />;
   else if (path[0] === 'settings') page = <AccountSettings />;
   else if (path[0] === 'notifications') page = <Notifications role={role} />;
+  else if (path[0] === 'ask-ai' && role === 'student') page = <RAGChat />;
   else if (
     (path[0] === 'applications' && role === 'student') ||
     (path[0] === 'applicants' && role === 'employer')

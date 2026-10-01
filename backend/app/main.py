@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from starlette.concurrency import run_in_threadpool
 
-from app.api import activity, applications, auth, internships, profiles, trust
+from app.api import activity, applications, auth, internships, profiles, simple_rag, trust
 from app.core.body_limit import UploadBodyLimit
 from app.core.config import settings
 from app.db.session import engine
@@ -78,6 +78,7 @@ def create_app():
         internships.router,
         applications.router,
         activity.router,
+        simple_rag.router,
     ):
         app.include_router(router, prefix="/api")
 

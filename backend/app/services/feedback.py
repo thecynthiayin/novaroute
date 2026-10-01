@@ -22,6 +22,6 @@ def generate_feedback(snapshot, listing, status, note):
         )
     return structured(
         Feedback,
-        "Provide practical interview preparation for viewed applications or learning improvements for rejected applications. Label advice as AI suggestions. Never claim to know a rejection reason unless the employer note supplies it. Do not invent qualifications or guarantee outcomes.",
+        "Provide practical interview preparation for viewed applications or rejected applications. Label advice as AI suggestions. Never claim to know a rejection reason unless the employer note supplies it. Do not invent qualifications or guarantee outcomes.",
         {"application_time_profile": snapshot, "listing": listing, "status": status, "employer_note": note},
     )

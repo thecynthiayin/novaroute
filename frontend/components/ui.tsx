@@ -24,9 +24,10 @@ export function ThemeSelect() {
     </select>
   );
 }
-export function Brand() {
+export function Brand({ role }: { role?: string }) {
+  const href = role ? `/${role}/dashboard` : '/';
   return (
-    <Link href="/" className="brand">
+    <Link href={href} className="brand">
       <span className="brand-symbol">
         N<span>↗</span>
       </span>

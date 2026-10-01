@@ -1,10 +1,15 @@
 # NovaRoute
 
-A locally runnable university capstone for technical internship discovery, resume-assisted profiles, employer review, and application feedback. FastAPI owns all business rules and data. Next.js only presents the UI and proxies `/api`.
+A locally runnable university capstone for technical internship discovery, resume-assisted profiles, employer review, application feedback, and AI-powered Q&A. FastAPI owns all business rules and data. Next.js only presents the UI and proxies `/api`.
 
 **Employer verification and admin dashboard:** [Upgrade and administrator setup](docs/admin-and-verification.md). Existing employers require review after upgrading. Public signup never creates administrator accounts. Employers submit legal/company and representative details; administrators approve, reject, suspend, review content, investigate student reports, and record decisions in an audit history.
 
-**Development AI is explicitly labelled.** `AI_MODE=demo` uses deterministic extraction, content-review and feedback rules. Recommendations always use real local MiniLM embeddings; there is no random-score fallback. Live Qwen requires an OpenRouter key. An empty recommendation list above the default strict `0.80` cutoff is a valid result.
+**AI Features:**
+- **Recommendations**: Semantic similarity matching using MiniLM embeddings
+- **LLM Feedback**: AI-powered application feedback using OpenRouter Qwen (live mode) or deterministic rules (demo mode)
+- **RAG Q&A**: AI-powered question answering about internships using semantic search
+
+**Development AI is explicitly labelled.** `AI_MODE=demo` uses deterministic extraction, content-review and feedback rules. Recommendations and RAG Q&A always use real local MiniLM embeddings; there is no random-score fallback. Live Qwen requires an OpenRouter key. An empty recommendation list above the default strict `0.80` cutoff is a valid result.
 
 ## Requirements
 
@@ -47,6 +52,7 @@ python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 ```powershell
 # Terminal 2, from novaroute
+cd ..
 Set-Location frontend
 npm run dev
 ```
@@ -97,6 +103,8 @@ Local demo password for all accounts: **`NovaRouteDemo!2026`**
 | `data@novaroute.test` | Student, data/ML |
 | `employer@novaroute.test` | Fictional Nova Labs demo employer |
 
+| `admin@example.com` | System Admninstrator  | password: `admin12345`
+
 Development seeds never overwrite existing profiles or user-edited listings. Production rejects demo-account authentication and demo seeding. All `.test` email stays in Mailpit by default; real recipient addresses are blocked unless explicitly enabled.
 
 ## Kaggle data
@@ -114,6 +122,8 @@ Use either that command or `--demo` for your presentation. Imported source examp
 For live mode, edit root `.env`: set `AI_MODE=live`, `OPENROUTER_API_KEY`, and `OPENROUTER_MODEL`. From `backend`, run `python -m app.jobs.check_provider` to inspect current supported Qwen IDs. The catalog advertised `qwen/qwen3.8-flash` with `response_format` and `structured_outputs` during implementation; provider availability can change. Restart FastAPI after settings changes. No paid OpenRouter request was exercised without credentials.
 
 `python -m app.jobs.model` downloads/loads MiniLM. After a successful download, `HF_HUB_OFFLINE=1` can force cache-only inference. `EMBEDDING_LOAD_ON_START=true` warms each backend process at startup; otherwise the first recommendation request loads it once.
+
+**RAG Q&A:** The simple RAG system uses the same MiniLM embeddings to answer questions about internships. No additional setup required - it works with the existing internship database. Access via `/student/ask-ai` in the UI or `POST /api/simple-rag/query` API endpoint.
 
 Mailpit defaults to SMTP port 1025, without authentication/TLS. For an external SMTP provider configure host, port, username, password and `SMTP_STARTTLS=true` (or `SMTP_SSL=true` on implicit TLS). Use an app password where your provider requires one. Enable `SMTP_ALLOW_REAL_RECIPIENTS=true` only when you intend to send to real people. No external email was sent during verification.
 
@@ -173,5 +183,15 @@ See `docs/evaluation.md`: proposed synthetic labels are separate from independen
 - Frontend `BACKEND_INTERNAL_URL` is server-side configuration, normally `http://127.0.0.1:8000`. If containerizing the application, use `http://backend:8000`; rebuild Next.js after changing a production rewrite destination. Cookies pass through the rewrite with `credentials: include`. No database or AI secret belongs in a `NEXT_PUBLIC_` variable.
 - Use a single backend process for the in-memory rate limiter; multi-process deployments need a shared rate-limit strategy outside this MVP. Model cache is per process. No Redis or task queue is included.
 - Production requires HTTPS, `COOKIE_SECURE=true`, `ENVIRONMENT=production`, `AI_MODE=live`, unique credentials, and exact trusted `ALLOWED_ORIGINS`. Local Compose credentials are examples only.
-- See `docs/architecture.md`, `docs/api.md`, `docs/ai-design.md`, and `docs/demo.md` for design details and demonstration flow.
+- See `docs/architecture.md`, `docs/api.md`, `docs/ai-design.md`, `docs/demo.md`, and `docs/ui-integration.md` for design details and demonstration flow.
+
+## AI Features Summary
+
+| Feature | Description | Mode Support | UI Location |
+|---------|-------------|--------------|-------------|
+| **Recommendations** | Semantic similarity matching between student profiles and internships using MiniLM embeddings | Demo + Live | Student Dashboard, Listings |
+| **LLM Feedback** | AI-powered application feedback with strengths, gaps, next steps, and practice questions | Demo + Live | Notifications, Applications |
+| **RAG Q&A** | AI-powered question answering about internships using semantic search | Demo + Live | `/student/ask-ai` |
+
+All three features share the same MiniLM embedding model (`sentence-transformers/all-MiniLM-L6-v2`) and work together seamlessly.
 

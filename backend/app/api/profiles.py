@@ -103,34 +103,62 @@ def upload(
     user: User = Depends(student),
     db: Session = Depends(get_db),
 ) -> dict:
+    import logging
+
+    logger = logging.getLogger(__name__)
     rate_limit(request, "upload", settings().upload_rate_limit)
-    data = file.file.read(settings().upload_max_bytes + 1)
-    text = extract_pdf(data)
-    profile_version = profile_for(db, user.id).version
-    db.commit()
-    ref, content_hash = store_pdf(data)
-    item = Resume(
-        student_id=user.id,
-        storage_ref=ref,
-        filename=display_filename(file.filename),
-        content_hash=content_hash,
-        profile_version=profile_version,
-        raw_text=text,
-        parse_state="processing",
-    )
-    db.add(item)
-    db.commit()
+
     try:
-        extracted = parse(text)
-        item.extracted, item.parse_state = extracted.model_dump(), "draft"
-    except AIError as exc:
-        item.parse_state, item.failure = "failed", str(exc)
-    db.commit()
-    return {
-        **row_dict(item, ("storage_ref", "raw_text")),
-        "confirmation_needed": item.parse_state == "draft",
-        "ai_mode": settings().ai_mode,
-    }
+        logger.info(f"Starting resume upload for user {user.id}")
+        data = file.file.read(settings().upload_max_bytes + 1)
+        logger.info(f"Read {len(data)} bytes from file")
+
+        text = extract_pdf(data)
+        logger.info(f"Extracted {len(text)} characters from PDF")
+
+        profile_version = profile_for(db, user.id).version
+        db.commit()
+
+        ref, content_hash = store_pdf(data)
+        logger.info(f"Stored PDF with ref {ref}")
+
+        item = Resume(
+            student_id=user.id,
+            storage_ref=ref,
+            filename=display_filename(file.filename),
+            content_hash=content_hash,
+            profile_version=profile_version,
+            raw_text=text,
+            parse_state="processing",
+        )
+        db.add(item)
+        db.commit()
+        logger.info(f"Created resume record with ID {item.id}")
+
+        try:
+            extracted = parse(text)
+            item.extracted, item.parse_state = extracted.model_dump(), "draft"
+            logger.info(f"Parsed resume successfully with state {item.parse_state}")
+        except AIError as exc:
+            item.parse_state, item.failure = "failed", str(exc)
+            logger.error(f"AI parsing failed: {exc}")
+        except Exception as exc:
+            item.parse_state, item.failure = "failed", f"Unexpected error: {str(exc)}"
+            logger.error(f"Unexpected parsing error: {exc}", exc_info=True)
+
+        db.commit()
+        logger.info(f"Resume upload completed successfully")
+
+        return {
+            **row_dict(item, ("storage_ref", "raw_text")),
+            "confirmation_needed": item.parse_state == "draft",
+            "ai_mode": settings().ai_mode,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(f"Resume upload failed: {exc}", exc_info=True)
+        raise HTTPException(500, f"Resume upload failed: {str(exc)}") from exc
 
 
 @router.get("/student/resumes", response_model=list[ResumeOut])

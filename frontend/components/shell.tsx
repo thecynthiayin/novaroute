@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   Settings,
+  Sparkles,
   UserRound,
   Users,
   X,
@@ -108,6 +109,7 @@ function Nav({ user, onNavigate }: { user: User; onNavigate?: () => void }) {
           ['internships', 'Find internships', BriefcaseBusiness],
           ['saved', 'Saved internships', Bookmark],
           ['applications', 'My applications', FileText],
+          ['ask-ai', 'Ask AI', Sparkles],
           ['reports', 'My reports', FileText],
           ['notifications', 'Notifications', Bell],
         ] as const)
@@ -129,7 +131,7 @@ function Nav({ user, onNavigate }: { user: User; onNavigate?: () => void }) {
           ] as const);
   return (
     <>
-      <Brand />
+      <Brand role={user.role} />
       <div className="workspace-label">{user.role} workspace</div>
       <nav className="nav-list" aria-label="Workspace">
         {links.map(([slug, label, Icon]) => (

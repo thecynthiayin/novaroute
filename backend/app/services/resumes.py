@@ -13,28 +13,52 @@ from app.services.skills import infer, normalize
 
 
 def extract_pdf(data: bytes):
+    import logging
+
+    logger = logging.getLogger(__name__)
     config = settings()
+
     if len(data) > config.upload_max_bytes:
         raise HTTPException(413, "PDF exceeds the upload size limit (default 5 MB)")
     if not data.startswith(b"%PDF-"):
         raise HTTPException(422, "Upload a valid PDF file")
+
     try:
+        logger.info(f"Opening PDF with pdfplumber, size: {len(data)} bytes")
         with pdfplumber.open(BytesIO(data)) as pdf:
+            logger.info(f"PDF has {len(pdf.pages)} pages")
             if len(pdf.pages) > config.upload_max_pages:
                 raise HTTPException(422, f"PDF must have at most {config.upload_max_pages} pages")
-            text = "\n".join(page.extract_text() or "" for page in pdf.pages)
+
+            text_parts = []
+            for i, page in enumerate(pdf.pages):
+                try:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text_parts.append(page_text)
+                    logger.debug(f"Extracted page {i}: {len(page_text or '')} chars")
+                except Exception as e:
+                    logger.warning(f"Failed to extract page {i}: {e}")
+                    text_parts.append("")
+
+            text = "\n".join(text_parts)
+            logger.info(f"Total extracted text: {len(text)} characters")
+
     except HTTPException:
         raise
-    except Exception:
+    except Exception as e:
+        logger.error(f"PDF extraction failed: {e}", exc_info=True)
         raise HTTPException(
             422, "PDF could not be read. Remove password protection and export a searchable PDF."
         ) from None
+
     if len(text.strip()) < 30:
         raise HTTPException(
             422, "This PDF has insufficient searchable text. Image-only scans require OCR outside this MVP."
         )
     if len(text) > config.upload_max_text:
         raise HTTPException(422, "PDF contains too much text. Upload a shorter resume.")
+
     return text
 
 
