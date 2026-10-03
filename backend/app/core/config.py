@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     embedding_cache_dir: Path = Path("model-cache")
     embedding_load_on_start: bool = False
-    recommendation_min_score: float = 0.80
+    recommendation_min_score: float = 0.50
     upload_max_bytes: int = 5 * 1024 * 1024
     upload_max_pages: int = 10
     upload_max_text: int = 24000
@@ -56,6 +56,5 @@ class Settings(BaseSettings):
         return self
 
 
-@lru_cache
 def settings() -> Settings:
     return Settings()

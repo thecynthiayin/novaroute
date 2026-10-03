@@ -83,7 +83,7 @@ export function Dashboard({ role }: { role: Role }) {
               <h3>Let your projects open doors.</h3>
               <p>
                 Your confirmed skills, coursework, and projects help us find meaningful
-                similarities. The default cutoff is strictly above 80%.
+                similarities. The default cutoff is strictly above 50%.
               </p>
             </div>
             <Link className="button secondary" href="/student/profile">
@@ -159,7 +159,7 @@ export function Dashboard({ role }: { role: Role }) {
         </div>
       ) : (
         <Empty title="A fresh start">
-          Your application events and new-match alerts will appear here.
+          Your application events will appear here.
         </Empty>
       )}
     </>

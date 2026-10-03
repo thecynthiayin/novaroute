@@ -122,8 +122,8 @@ NovaRoute addresses these challenges through three AI-powered features:
 2. System encodes profile using MiniLM → 384-dimensional vector
 3. Encodes all active internships → vectors
 4. Computes cosine similarity between profile and internships
-5. Returns matches above 0.80 threshold
-6. Displays in student dashboard with explanations
+5. Returns matches above 0.50 threshold
+6. Displays in student dashboard match section ("Opportunities that connect") with explanations
 
 **LLM Feedback Flow:**
 1. Employer updates application status (viewed/rejected)
@@ -131,7 +131,7 @@ NovaRoute addresses these challenges through three AI-powered features:
 3. Generates feedback using LLM (live) or rules (demo)
 4. Creates notification with feedback
 5. Sends email with feedback
-6. Displays in student notifications
+6. Displays in student notifications (Notification inbox & header bell are reserved for application process updates)
 
 **RAG Q&A Flow:**
 1. Student asks question (e.g., "What skills are needed for data science?")
@@ -150,7 +150,7 @@ NovaRoute addresses these challenges through three AI-powered features:
 **Implementation:**
 - Uses `sentence-transformers/all-MiniLM-L6-v2` (384-dimensional embeddings)
 - Cosine similarity for matching
-- Strict 0.80 threshold (configurable)
+- Default 0.50 threshold (configurable)
 - No random fallbacks
 
 **Algorithm:**
@@ -159,7 +159,7 @@ NovaRoute addresses these challenges through three AI-powered features:
 profile_vector = encode(profile_text)
 internship_vectors = [encode(listing_text) for listing in internships]
 similarities = [cosine(profile_vector, iv) for iv in internship_vectors]
-matches = [(internship, score) for internship, score in zip(internships, similarities) if score > 0.80]
+matches = [(internship, score) for internship, score in zip(internships, similarities) if score > 0.50]
 matches.sort(by=score, descending=True)
 ```
 
@@ -167,12 +167,12 @@ matches.sort(by=score, descending=True)
 - Skill overlap analysis (exact skill matching)
 - Semantic alignment explanation (when no exact skill match)
 - Matched/missing skills display
-- High-match alerts for new internships
+- Dedicated dashboard match section ("Opportunities that connect")
 
 **Limitations:**
 - Only matches on skills, coursework, and projects
 - Does not consider location, work mode, or other preferences
-- 0.80 threshold may filter out relevant matches
+- 0.50 threshold can be configured via `RECOMMENDATION_MIN_SCORE`
 - Requires complete profile to work
 
 ### 3.2 LLM-Powered Feedback
@@ -540,7 +540,7 @@ npm run dev
 **Recommendations:**
 - Only considers skills, coursework, projects
 - Does not match on location, work mode, salary
-- 0.80 threshold may be too strict
+- Configurable threshold (default `RECOMMENDATION_MIN_SCORE=0.50`)
 - No reranking of results
 
 **LLM Feedback:**
@@ -607,7 +607,7 @@ NovaRoute successfully integrates three AI features (recommendations, LLM feedba
 
 ### 9.1 Achievements
 
-✅ **Semantic Recommendations**: Real embedding-based matching with 0.80 threshold
+✅ **Semantic Recommendations**: Real embedding-based matching with 0.50 threshold
 ✅ **LLM Feedback**: Structured AI feedback with strengths, gaps, and next steps
 ✅ **RAG Q&A**: New feature for intelligent question answering
 ✅ **Local Processing**: All AI operations run locally with MiniLM
@@ -651,8 +651,8 @@ AI_TIMEOUT_SECONDS=30
 # Embedding Configuration
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 EMBEDDING_CACHE_DIR=model-cache
-EMBEDDING_LOAD_ON_START=false
-RECOMMENDATION_MIN_SCORE=0.80
+EMBEDDING_LOAD_ON_START=true
+RECOMMENDATION_MIN_SCORE=0.50
 
 # Upload Configuration
 UPLOAD_MAX_BYTES=5242880

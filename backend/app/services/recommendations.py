@@ -33,7 +33,11 @@ def eligible_query():
 
 def recommendations(db, user_id, limit=10, threshold=None):
     profile = db.scalar(select(StudentProfile).where(StudentProfile.user_id == user_id))
-    if not profile or not (profile.extracted_skills or profile.coursework or profile.projects):
+    if not profile or not (
+        (profile.extracted_skills and len(profile.extracted_skills) > 0)
+        or (profile.coursework and len(profile.coursework) > 0)
+        or (profile.projects and len(profile.projects) > 0)
+    ):
         return []
     listings = list(
         db.scalars(
@@ -54,11 +58,19 @@ def recommendations(db, user_id, limit=10, threshold=None):
         limit,
     )
     by_id = {item.id: item for item in listings}
-    skills = profile.extracted_skills + [s for p in profile.projects for s in p["technologies"]]
+    raw_skills = profile.extracted_skills or []
+    raw_projects = profile.projects or []
+    proj_skills = [
+        s
+        for p in raw_projects
+        if isinstance(p, dict)
+        for s in (p.get("technologies") or [])
+    ]
+    skills = list(raw_skills) + proj_skills
     results = []
     for identifier, score in ranked:
         item = by_id[identifier]
-        matched, missing = evidence(skills, item.required_skills)
+        matched, missing = evidence(skills, item.required_skills or [])
         results.append(
             {
                 "internship": listing_dict(db, item),
@@ -90,25 +102,7 @@ def evaluate_alerts(student_id=None, listing_id=None):
             )
         for identifier in ids:
             with SessionLocal() as db:
-                results = recommendations(db, identifier, limit=10000)
-                for match in results:
-                    item = match["internship"]
-                    if listing_id and item["id"] != listing_id:
-                        continue
-                    try:
-                        with db.begin_nested():
-                            notify(
-                                db,
-                                identifier,
-                                f"match:{identifier}:{item['id']}",
-                                "high_match",
-                                "A new internship matches your profile",
-                                f"{item['title']} has {match['percentage']}% semantic similarity. This is not a hiring probability.",
-                                {"internship_id": item["id"], "similarity": match["similarity"]},
-                            )
-                    except IntegrityError:
-                        pass
-                db.commit()
+                recommendations(db, identifier, limit=10)
         from app.jobs.delivery import retry_pending
 
         retry_pending(50)

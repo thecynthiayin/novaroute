@@ -70,21 +70,33 @@ embeddings = Embeddings()
 
 
 def profile_text(profile):
-    projects = profile.projects
+    skills = profile.extracted_skills or []
+    coursework = profile.coursework or []
+    projects = profile.projects or []
+    proj_texts = []
+    for p in projects:
+        if isinstance(p, dict):
+            t = p.get("title") or ""
+            techs = ", ".join(p.get("technologies") or [])
+            d = p.get("description") or ""
+            proj_texts.append(f"{t} {techs} {d}".strip())
+        elif isinstance(p, str):
+            proj_texts.append(p)
     return (
         "Skills: "
-        + ", ".join(profile.extracted_skills)
+        + ", ".join(skills)
         + ". Coursework: "
-        + ", ".join(profile.coursework)
+        + ", ".join(coursework)
         + ". Projects: "
-        + "; ".join(
-            p["title"] + " " + ", ".join(p["technologies"]) + " " + p["description"] for p in projects
-        )
+        + "; ".join(proj_texts)
     )
 
 
 def listing_text(listing):
-    return "Skills: " + ", ".join(listing.required_skills) + ". " + listing.title + ". " + listing.description
+    skills = listing.required_skills or []
+    title = listing.title or ""
+    desc = listing.description or ""
+    return "Skills: " + ", ".join(skills) + ". " + title + ". " + desc
 
 
 def rank(query_vector, candidates, threshold, limit):

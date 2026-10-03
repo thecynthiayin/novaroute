@@ -57,4 +57,4 @@ def test_new_match_event_dedup_and_get_has_no_side_effect(pair, listing, monkeyp
     pair[2].get("/api/student/recommendations")
     pair[2].get("/api/student/recommendations")
     with SessionLocal() as db:
-        assert db.scalar(select(func.count(Notification.id)).where(Notification.type == "high_match")) == 1
+        assert db.scalar(select(func.count(Notification.id)).where(Notification.type == "high_match")) == 0

@@ -144,7 +144,10 @@ def inbox(
     db: Session = Depends(get_db),
 ):
     query = select(Notification).where(
-        Notification.recipient_id == user.id, Notification.dismissed_at.is_(None)
+        Notification.recipient_id == user.id,
+        Notification.dismissed_at.is_(None),
+        Notification.type != "high_match",
+        ~Notification.event_key.like("match:%"),
     )
     if read != "all":
         query = query.where(
@@ -174,6 +177,8 @@ def unread(user: User = Depends(current_user), db: Session = Depends(get_db)) ->
                 Notification.recipient_id == user.id,
                 Notification.read_at.is_(None),
                 Notification.dismissed_at.is_(None),
+                Notification.type != "high_match",
+                ~Notification.event_key.like("match:%"),
             )
         )
     }
@@ -236,6 +241,20 @@ def dashboard(user: User = Depends(current_user), db: Session = Depends(get_db))
             ),
             "Profile completion": completion,
         }
+        recent_events = [
+            row_dict(x, ("event_key",))
+            for x in db.scalars(
+                select(Notification)
+                .where(
+                    Notification.recipient_id == user.id,
+                    Notification.dismissed_at.is_(None),
+                    Notification.type != "high_match",
+                    ~Notification.event_key.like("match:%"),
+                )
+                .order_by(Notification.created_at.desc(), Notification.id.desc())
+                .limit(4)
+            )
+        ]
     else:
         counts = {
             "Active listings": db.scalar(
@@ -256,4 +275,5 @@ def dashboard(user: User = Depends(current_user), db: Session = Depends(get_db))
                 select(func.count(Application.id)).join(Internship).where(Internship.employer_id == user.id)
             ),
         }
-    return {"counts": counts, "recent_events": inbox("all", 1, 4, user, db)["items"]}
+        recent_events = inbox("all", 1, 4, user, db)["items"]
+    return {"counts": counts, "recent_events": recent_events}

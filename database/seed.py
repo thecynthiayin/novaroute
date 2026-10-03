@@ -19,8 +19,8 @@ from app.schemas import ListingInput
 from app.services.skills import infer, normalize
 
 ALIASES = {
-    "title": ["internship_title", "title", "job_title", "position", "role"],
-    "company": ["company_name", "company", "organization"],
+    "title": ["internship_title", "title", "job_title", "position", "role", "jobtitles"],
+    "company": ["company_name", "company", "organization", "company_name"],
     "description": ["description", "job_description", "about_internship"],
     "skills": ["skills", "required_skills", "skill_required"],
     "location": ["location", "locations", "city"],
@@ -67,7 +67,7 @@ def prepare(row, selected, kind):
     title, company = get("title"), get("company")
     if not title or not company:
         raise ValueError("Missing title or company")
-    location = get("location") or "Not specified"
+    location = get("location") or "Not specified (see internship link)"
     duration = get("duration") or "Not specified"
     source_description = get("description")
     inferred = not bool(get("skills"))
@@ -130,7 +130,7 @@ def prepare(row, selected, kind):
             "source_stipend": stipend,
             "source_deadline": get("deadline"),
             "historical": kind == "kaggle",
-            "source_url": "https://www.kaggle.com/datasets/everydaycodings/internship-opportunities-dataset"
+            "source_url": "https://www.kaggle.com/datasets/dev122/internshala-jobs-dataset"
             if kind == "kaggle"
             else "synthetic-local-v1",
         },
@@ -257,18 +257,27 @@ def import_csv(path, limit=25, seed=42, demo=False, overrides=None):
     return import_dataframe(frame, limit=limit, seed=seed, kind=kind, overrides=overrides)
 
 
-def load_kaggle_dataset(file_path="internship.csv"):
+def load_kaggle_dataset(file_path=""):
     import kagglehub
-    from kagglehub import KaggleDatasetAdapter
+    from pathlib import Path
 
-    print("Loading dataset from Kaggle via kagglehub...")
-    target_file = file_path if file_path else "internship.csv"
-    loader = getattr(kagglehub, "dataset_load", getattr(kagglehub, "load_dataset", None))
-    df = loader(
-        KaggleDatasetAdapter.PANDAS,
-        "everydaycodings/internship-opportunities-dataset",
-        target_file,
-    )
+    print("Downloading dataset from Kaggle via kagglehub...")
+    # Download the Internshala dataset
+    download_path = kagglehub.dataset_download("dev122/internshala-jobs-dataset")
+    print(f"Dataset downloaded to: {download_path}")
+
+    # Find the CSV file in the downloaded directory
+    download_dir = Path(download_path)
+    csv_files = list(download_dir.glob("*.csv"))
+
+    if not csv_files:
+        raise ValueError(f"No CSV files found in {download_path}")
+
+    csv_file = csv_files[0]  # Use the first CSV file found
+    print(f"Loading CSV file: {csv_file}")
+
+    # Read the CSV file
+    df = pd.read_csv(csv_file, encoding="utf-8-sig", dtype=str, keep_default_na=False)
     return df
 
 

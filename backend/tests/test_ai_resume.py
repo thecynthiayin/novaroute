@@ -258,3 +258,23 @@ def test_student_deactivation_removes_resume_content(pair, application):
     assert not path.exists()
     with SessionLocal() as db:
         assert db.get(Application, application["id"]).profile_snapshot == {}
+
+
+def test_student_dashboard_filters_match_notifications(pair):
+    student, user = pair[2], pair[3]
+    with SessionLocal() as db:
+        from app.services.events import notify
+
+        notify(
+            db,
+            user["id"],
+            f"match:{user['id']}:999",
+            "high_match",
+            "A new internship matches your profile",
+            "Test match notification body",
+            {"internship_id": 999, "similarity": 0.9},
+        )
+        db.commit()
+    dash = student.get("/api/dashboard").json()
+    assert not any(n["kind"] == "high_match" for n in dash["recent_events"])
+

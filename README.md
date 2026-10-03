@@ -9,7 +9,7 @@ A locally runnable university capstone for technical internship discovery, resum
 - **LLM Feedback**: AI-powered application feedback using OpenRouter Qwen (live mode) or deterministic rules (demo mode)
 - **RAG Q&A**: AI-powered question answering about internships using semantic search
 
-**Development AI is explicitly labelled.** `AI_MODE=demo` uses deterministic extraction, content-review and feedback rules. Recommendations and RAG Q&A always use real local MiniLM embeddings; there is no random-score fallback. Live Qwen requires an OpenRouter key. An empty recommendation list above the default strict `0.80` cutoff is a valid result.
+**Development AI is explicitly labelled.** `AI_MODE=demo` uses deterministic extraction, content-review and feedback rules. Recommendations and RAG Q&A always use real local MiniLM embeddings; there is no random-score fallback. Live Qwen requires an OpenRouter key. An empty recommendation list above the default strict `0.50` cutoff is a valid result.
 
 ## Requirements
 
@@ -174,7 +174,7 @@ From `backend`, run the small academic experiment:
 python -m app.jobs.evaluate
 ```
 
-See `docs/evaluation.md`: proposed synthetic labels are separate from independently reviewed labels. This project uses pretrained inference and API integration, not training from scratch. The 0.80 similarity cutoff is not 80% accuracy.
+See `docs/evaluation.md`: proposed synthetic labels are separate from independently reviewed labels. This project uses pretrained inference and API integration, not training from scratch. The 0.50 similarity cutoff is not 50% accuracy.
 
 ## Data and deployment notes
 
