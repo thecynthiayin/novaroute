@@ -399,9 +399,7 @@ function ApplicationCard({ application: a, role }: { application: Application; r
           ) : n.feedback_state === 'pending' ? (
             <p className="muted">Feedback is being prepared…</p>
           ) : null}
-          <small className="muted">
-            {n.title} · Email: {n.email_state || 'disabled'}
-          </small>
+          <small className="muted">{n.title}</small>
         </section>
       ))}
     </article>

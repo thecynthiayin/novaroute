@@ -15,7 +15,7 @@ A locally runnable university capstone for technical internship discovery, resum
 
 - Node.js 24 LTS (verified with 24.14.0), npm 11.9.0.
 - Python 3.12 (verified with 3.12.14). Use 3.12 for the pinned PyTorch stack.
-- Docker Desktop/Engine with Compose, or native MySQL **8.4** and Mailpit.
+- Docker Desktop/Engine with Compose, or native MySQL **8.4**.
 - A few GB free for Python/PyTorch, Node dependencies, and the local model cache. Initial model download needs internet; cached inference runs on CPU.
 
 Exact installed versions are recorded in `frontend/package-lock.json`, `backend/requirements-lock.txt`, and `docs/versions.md`. Runtime requirements and development requirements are pinned separately. No global Python installation is modified by setup.
@@ -80,7 +80,7 @@ cp .env.example .env.local
 Terminal 1: `cd backend && ../backend/.venv/bin/python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`.
 Terminal 2: `cd frontend && npm run dev`.
 
-The Windows path was exercised in this workspace. The POSIX commands are equivalent instructions, not an independently executed platform test. Docker was unavailable here; actual integration verification used portable MySQL 8.4.11 and Mailpit 1.31.2. See `docs/verification.md` for exact evidence.
+The Windows path was exercised in this workspace. The POSIX commands are equivalent instructions, not an independently executed platform test. Docker was unavailable here; actual integration verification used portable MySQL 8.4.11. See `docs/verification.md` for exact evidence.
 
 ## Open the application
 
@@ -89,7 +89,6 @@ The Windows path was exercised in this workspace. The POSIX commands are equival
 | Application | http://localhost:3000 |
 | API/OpenAPI | http://127.0.0.1:8000/docs |
 | Liveness/readiness | http://127.0.0.1:8000/api/health · `/api/ready` |
-| Mailpit inbox | http://127.0.0.1:8025 |
 | MySQL | `127.0.0.1:3306`, database/user `novaroute` |
 
 The current workspace's isolated portable MySQL runs on **3307** because an existing database occupied 3306. Its ignored local `.env` is already configured accordingly. Compose clean setups use 3306; choose another host port and update `DATABASE_URL` if occupied. Do not stop or alter an unrelated local database.
@@ -105,7 +104,7 @@ Local demo password for all accounts: **`NovaRouteDemo!2026`**
 
 | `admin@example.com` | System Admninstrator  | password: `admin12345`
 
-Development seeds never overwrite existing profiles or user-edited listings. Production rejects demo-account authentication and demo seeding. All `.test` email stays in Mailpit by default; real recipient addresses are blocked unless explicitly enabled.
+Development seeds never overwrite existing profiles or user-edited listings. Production rejects demo-account authentication and demo seeding. All `.test` recipient addresses are used by default; real recipient addresses are blocked unless explicitly enabled.
 
 ## Kaggle data
 
@@ -125,7 +124,7 @@ For live mode, edit root `.env`: set `AI_MODE=live`, `OPENROUTER_API_KEY`, and `
 
 **RAG Q&A:** The simple RAG system uses the same MiniLM embeddings to answer questions about internships. No additional setup required - it works with the existing internship database. Access via `/student/ask-ai` in the UI or `POST /api/simple-rag/query` API endpoint.
 
-Mailpit defaults to SMTP port 1025, without authentication/TLS. For an external SMTP provider configure host, port, username, password and `SMTP_STARTTLS=true` (or `SMTP_SSL=true` on implicit TLS). Use an app password where your provider requires one. Enable `SMTP_ALLOW_REAL_RECIPIENTS=true` only when you intend to send to real people. No external email was sent during verification.
+External email/Gmail syncing integrations, Mailpit dependencies, and UI failure tags (`Email: failed`) have been removed. For an external SMTP provider, configure host, port, username, password and `SMTP_STARTTLS=true` (or `SMTP_SSL=true` on implicit TLS). Enable `SMTP_ALLOW_REAL_RECIPIENTS=true` only when you intend to send to real people.
 
 After a restart or failure, run from `backend`:
 
@@ -166,7 +165,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Browser tests require a separately created local administrator supplied through `E2E_ADMIN_EMAIL` and `E2E_ADMIN_PASSWORD`. They create fresh `.test` accounts and synthetic listings/reports in the configured development database. Safety-review fixtures remain hidden/suspended for inspection. They exercise real Mailpit delivery if Mailpit is running. For production preview use `npm run build` then `npm start`, instead of `npm run dev`.
+Browser tests require a separately created local administrator supplied through `E2E_ADMIN_EMAIL` and `E2E_ADMIN_PASSWORD`. They create fresh `.test` accounts and synthetic listings/reports in the configured development database. Safety-review fixtures remain hidden/suspended for inspection. For production preview use `npm run build` then `npm start`, instead of `npm run dev`.
 
 From `backend`, run the small academic experiment:
 

@@ -93,7 +93,7 @@ export function RAGChat() {
             disabled={loading}
           />
           <button type="submit" className="button" disabled={loading || !question.trim()}>
-            {loading ? <Loading size={16} /> : <Send size={16} />}
+            {loading ? 'Thinking...' : <Send size={16} />}
           </button>
         </form>
         <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>

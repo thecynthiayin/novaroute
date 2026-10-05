@@ -55,7 +55,7 @@ Each Playwright journey registers both roles, edits a profile, uploads/confirms 
 ## Explicit limitations and unexecuted checks
 
 - **Live Qwen/OpenRouter inference:** not run; no API key supplied. The public catalog and structured-output documentation were consulted. Configuration, schemas, bounded retries and failure handling are implemented; mocked calls do not prove real provider behavior.
-- **External/Gmail SMTP:** not run; no credentials supplied. Mailpit delivery was real and verified. Real recipients are disabled by default.
+- **External SMTP:** not run; no credentials supplied. Mailpit delivery was real and verified. Real recipients are disabled by default.
 - **Docker Compose startup:** not run because Docker was not available. The same pinned MySQL/Mailpit versions were downloaded and started natively in a workspace-local test installation. Compose health checks/configuration are provided. The MySQL archive's MD5 matched the publisher's advertised checksum.
 - **macOS/Linux setup:** documented equivalent native commands; not executed on those operating systems.
 - **Independent model evaluation:** not performed. Three synthetic profiles with proposed relevance labels are not a population-level accuracy estimate. The 0.80 cosine cutoff is not measured accuracy.
