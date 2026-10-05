@@ -101,10 +101,9 @@ Local demo password for all accounts: **`NovaRouteDemo!2026`**
 | `database@novaroute.test` | Student, databases |
 | `data@novaroute.test` | Student, data/ML |
 | `employer@novaroute.test` | Fictional Nova Labs demo employer |
+| `admin@example.com` | System Administrator (password: `admin12345`) |
 
-| `admin@example.com` | System Admninstrator  | password: `admin12345`
-
-Development seeds never overwrite existing profiles or user-edited listings. Production rejects demo-account authentication and demo seeding. All `.test` recipient addresses are used by default; real recipient addresses are blocked unless explicitly enabled.
+Development seeds never overwrite existing profiles or user-edited listings. Production rejects demo-account authentication and demo seeding.
 
 ## Kaggle data
 
@@ -116,7 +115,7 @@ python database/seed.py --csv database/data/internship.csv --limit 25 --seed 42
 
 Use either that command or `--demo` for your presentation. Imported source examples are labelled historical and belong to the fictional seed employer. Original company names are preserved as provenance, not impersonated accounts. See `docs/dataset.md` for verified headers, download instructions, license metadata, mapping and limitations. Source Kaggle data is not copied into this repository.
 
-## AI, email, and recovery
+## AI and recovery
 
 For live mode, edit root `.env`: set `AI_MODE=live`, `OPENROUTER_API_KEY`, and `OPENROUTER_MODEL`. From `backend`, run `python -m app.jobs.check_provider` to inspect current supported Qwen IDs. The catalog advertised `qwen/qwen3.8-flash` with `response_format` and `structured_outputs` during implementation; provider availability can change. Restart FastAPI after settings changes. No paid OpenRouter request was exercised without credentials.
 
@@ -124,16 +123,11 @@ For live mode, edit root `.env`: set `AI_MODE=live`, `OPENROUTER_API_KEY`, and `
 
 **RAG Q&A:** The simple RAG system uses the same MiniLM embeddings to answer questions about internships. No additional setup required - it works with the existing internship database. Access via `/student/ask-ai` in the UI or `POST /api/simple-rag/query` API endpoint.
 
-External email/Gmail syncing integrations, Mailpit dependencies, and UI failure tags (`Email: failed`) have been removed. For an external SMTP provider, configure host, port, username, password and `SMTP_STARTTLS=true` (or `SMTP_SSL=true` on implicit TLS). Enable `SMTP_ALLOW_REAL_RECIPIENTS=true` only when you intend to send to real people.
-
 After a restart or failure, run from `backend`:
 
 ```bash
-python -m app.jobs.delivery --limit 50
 python -m app.jobs.model --retry-matches
 ```
-
-Email retries honor bounded exponential delay (up to one hour); active claims expire after ten minutes. Feedback retries also work for notifications whose email preference was disabled. A factual fallback email is not resent just because later feedback succeeds; updated advice appears in the inbox. `BackgroundTasks` is not a durable queue. The persisted outbox plus manual retry handles restart recovery; a crash after SMTP acceptance can still produce a duplicate delivery.
 
 ## Verification commands
 
@@ -153,7 +147,7 @@ python -m ruff check app tests
 
 POSIX: `TEST_DATABASE_URL='mysql+pymysql://novaroute:local_dev_password@127.0.0.1:3306/novaroute_test?charset=utf8mb4' python -m pytest -q`.
 
-Tests use Alembic, then delete records **only in the isolated test database** between tests. They do not use SQLite. External paid model calls and routine SMTP are mocked. Optional real checks are documented in `docs/verification.md`.
+Tests use Alembic, then delete records **only in the isolated test database** between tests. They do not use SQLite. External paid model calls are mocked. Optional real checks are documented in `docs/verification.md`.
 
 From `frontend`, with backend, frontend, and MySQL running:
 
